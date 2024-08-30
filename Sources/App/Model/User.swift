@@ -23,13 +23,21 @@ final class User: Model {
     @Children(for: \.$user)
     var posts: [Post]
     
+    @Field(key: "following")
+    var following: [UUID]
+    
+    @Field(key: "followers")
+    var followers: [UUID]
+    
     init() { }
     
-    init(username: String, name: String, avatar: String?, password: String) {
+    init(username: String, name: String, avatar: String?, password: String, following: [UUID], followers: [UUID]) {
         self.username = username
         self.name = name
         self.avatar = avatar
         self.password = password
+        self.following = following
+        self.followers = followers
     }
     
 }
@@ -49,14 +57,16 @@ extension User {
         var username: String
         var name: String
         var avatar: String?
+        var following: [UUID]
+        var followers: [UUID]
     }
     
     convenience init(_ input: Input) throws {
-        self.init(username: input.username, name: input.name, avatar: nil, password: try Bcrypt.hash(input.password))
+        self.init(username: input.username, name: input.name, avatar: nil, password: try Bcrypt.hash(input.password), following: [], followers: [])
     }
     
     var `public`: Public {
-        Public(id: self.id, username: self.username, name: self.name, avatar: self.avatar)
+        Public(id: self.id, username: self.username, name: self.name, avatar: self.avatar, following: self.following, followers: self.followers)
     }
     
 }

@@ -29,17 +29,21 @@ final class Post: Model {
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
     
+    @Field(key: "tags")
+    var tags: [String]
+    
     init() {}
     
-    init(text: String, media: String? = nil, userID: User.IDValue, parentID: Post.IDValue? = nil) {
+    init(text: String, media: String? = nil, userID: User.IDValue, parentID: Post.IDValue? = nil, tags: [String] = []) {
         self.text = text
         self.media = media
         self.likeCount = 0
         self.$user.id = userID
         self.$parent.id = parentID
+        self.tags = tags
     }
     
-    init(form: Form, userID: User.IDValue, parentID: Post.IDValue? = nil) {
+    init(form: Form, userID: User.IDValue, parentID: Post.IDValue? = nil, tags: [String]) {
         self.text = form.text
         if let media = form.media {
             self.media = try? media.data.write(to: URL(fileURLWithPath: DirectoryConfiguration.detect().publicDirectory), contentType: media.contentType)
@@ -47,10 +51,11 @@ final class Post: Model {
         self.likeCount = 0
         self.$user.id = userID
         self.$parent.id = parentID
+        self.tags = []
     }
     
     var `public`: Public {
-        .init(id: id!, text: text, media: media, likeCount: likeCount, createdAt: createdAt, updatedAt: updatedAt, userID: $user.id, user: $user.value?.public)
+        .init(id: id!, text: text, media: media, likeCount: likeCount, createdAt: createdAt, updatedAt: updatedAt, userID: $user.id, user: $user.value?.public, tags: tags)
     }
     
 }
@@ -73,6 +78,7 @@ extension Post {
         var updatedAt: Date?
         var userID: UUID
         var user: User.Public?
+        var tags: [String]
     }
 
 }
@@ -124,18 +130,22 @@ extension Post {
         @Field(key: "created_at")
         var createdAt: Date?
         
+        @Field(key: "tags")
+        var tags: [String]
+        
         init() {}
         
-        init(text: String, media: String? = nil, userID: User.IDValue, createdAt: Date) {
+        init(text: String, media: String? = nil, userID: User.IDValue, createdAt: Date, tags: [String]) {
             self.text = text
             self.media = media
             self.createdAt = createdAt
             self.likeCount = 0
             self.$user.id = userID
+            self.tags = tags
         }
         
         var `public`: Post.Public {
-            Post.Public(id: id!, text: text, media: media, likeCount: likeCount, createdAt: createdAt, updatedAt: nil, userID: $user.id)
+            Post.Public(id: id!, text: text, media: media, likeCount: likeCount, createdAt: createdAt, updatedAt: nil, userID: $user.id, tags: tags)
         }
         
     }

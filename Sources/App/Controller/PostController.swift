@@ -38,7 +38,7 @@ struct PostController: RouteCollection {
         switch req.headers.contentType {
             case .plainText?:
                 let content = try req.content.decode(String.self)
-                let post = try Post(text: content, userID: user.requireID(), parentID: id)
+                let post = try Post(text: content, userID: user.requireID(), parentID: id, tags: [])
                 try await post.save(on: req.db)
                 return post.public
             case .formData?:
@@ -46,7 +46,7 @@ struct PostController: RouteCollection {
                 guard let contentType = form.media?.contentType, [.any].contains(contentType) else {
                     throw Abort(.unsupportedMediaType)
                 }
-                let post = try Post(form: form, userID: user.requireID(), parentID: id)
+                let post = try Post(form: form, userID: user.requireID(), parentID: id, tags: [])
                 try await post.save(on: req.db)
                 return post.public
             default:
@@ -88,7 +88,7 @@ struct PostController: RouteCollection {
                 guard let contentType = form.media?.contentType, [.any].contains(contentType) else {
                     throw Abort(.unsupportedMediaType)
                 }
-                let post = try Post(form: form, userID: user.requireID())
+                let post = try Post(form: form, userID: user.requireID(), tags: [])
                 try await post.save(on: req.db)
                 return post.public
             default:
@@ -107,7 +107,7 @@ struct PostController: RouteCollection {
         }
         
         for input in inputs {
-            let post = try Post.Mock(text: input.text, userID: users.randomElement()!.requireID(), createdAt: input.createdAt)
+            let post = try Post.Mock(text: input.text, userID: users.randomElement()!.requireID(), createdAt: input.createdAt, tags: [])
             try await post.save(on: req.db)
         }
         

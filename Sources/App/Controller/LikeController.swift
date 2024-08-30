@@ -57,7 +57,7 @@ struct LikeController: RouteCollection {
                 try await post.save(on: $0)
             }
 
-            return Response(status: .noContent)
+            return Response(status: .ok)
         }
     }
     
@@ -127,7 +127,7 @@ struct LikeController: RouteCollection {
             try await like.delete(on: $0)
             try await post.save(on: $0)
         }
-        return Response(status: .noContent)
+        return Response(status: .ok)
     }
     
     func likingUsers(req: Request) async throws -> [User.Public] {

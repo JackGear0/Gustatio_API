@@ -28,6 +28,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(UpdateLike())
     app.migrations.add(CreateReport())
     app.migrations.add(CreateToken())
+//    app.migrations.add(AddTags())
     
     let encoder = JSONEncoder()
     encoder.keyEncodingStrategy = .convertToSnakeCase

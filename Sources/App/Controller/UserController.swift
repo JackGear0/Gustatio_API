@@ -13,6 +13,8 @@ struct UserController: RouteCollection {
                 $0.put("avatar", use: updateAvatar)
                 $0.delete("avatar", use: deleteAvatar)
                 $0.post("logout", use: logout)
+                $0.post("follow", ":id", use: follow)
+                $0.post("unfollow", ":id", use: unfollow)
             }
             $0.grouped(User.authenticator()).post("login", use: login)
             
@@ -97,4 +99,48 @@ struct UserController: RouteCollection {
         return session
     }
     
+    func follow(req: Request) async throws -> Response {
+        let user = try req.auth.require(User.self)
+        let userID = try user.requireID()
+        
+        let followingUserId = try req.parameters.require("id", as: User.IDValue.self)
+        let followingUser = try await User.find(followingUserId, on: req.db)
+        
+        if let _ = user.following.first(where: {$0 == followingUserId}) {
+            return Response(status: .conflict)
+        }
+        else {
+            // Adiciona o usuario desejado a lista de seguidos
+            user.following.append(followingUserId)
+            // Adiciona o usuario autenticado a lista de seguidores
+            followingUser?.followers.append(userID)
+            
+            try await user.save(on: req.db)
+            try await followingUser?.save(on: req.db)
+        }
+        return Response(status: .ok)
+        }
+    
+    func unfollow(req: Request) async throws -> Response {
+        let user = try req.auth.require(User.self)
+        let userID = try user.requireID()
+        
+        let followingUserId = try req.parameters.require("id", as: User.IDValue.self)
+        let followingUser = try await User.find(followingUserId, on: req.db)
+        
+        
+        if let _ = user.following.first(where: {$0 == followingUserId}) {
+            // Remove o usuario desejado a lista de seguidos
+            user.following.removeAll(where: {$0 == followingUserId})
+            // Adiciona o usuario autenticado a lista de seguidores
+            followingUser?.followers.removeAll(where: {$0 == userID})
+            
+            try await user.save(on: req.db)
+            try await followingUser?.save(on: req.db)
+        }
+        else {
+            return Response(status: .conflict)
+        }
+        return Response(status: .ok)
+        }
 }

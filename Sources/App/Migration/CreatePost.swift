@@ -24,3 +24,35 @@ struct CreatePost: AsyncMigration {
     
 }
 
+struct AddTags: AsyncMigration {
+    
+    func prepare(on database: Database) async throws {
+        try await database
+            .schema(Post.schema)
+            .field("tags", .uuid)
+            .update()
+//        // ler os posts que existem
+//        database.query()
+//        post.save(on: database)
+    }
+    
+    func revert(on database: Database) async throws {
+    }
+    
+}
+//struct AddParentIdFK0: AsyncMigration {
+//
+//    func prepare(on database: Database) async throws {
+//        try await database
+//            .schema(Post.schema)
+//            .foreignKey("parent_id", references: Post.schema, "id", onDelete: .cascade, onUpdate: .cascade)
+//            .update()
+////        // ler os posts que existem
+////        database.query()
+////        post.save(on: database)
+//    }
+//
+//    func revert(on database: Database) async throws {
+//    }
+//
+//}
